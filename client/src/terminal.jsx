@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
 
-function TerminalBox({socket}) {
+function TerminalBox({socket,setIsClicked}) {
     const terminalRef=useRef(null);
     const xtermInstance=useRef(null);
     useEffect(()=>{
@@ -32,6 +32,7 @@ function TerminalBox({socket}) {
         })
          const handleOutput=(serverData)=>{
             term.write(serverData)
+            setIsClicked(false);
          }
          socket.on('terminal-output',handleOutput)
         return ()=>{
@@ -40,7 +41,7 @@ function TerminalBox({socket}) {
         }
     },[socket])
     return (
-        <div className='w-123 h-144' ref={terminalRef} style={{textAlign:'left'}}>
+        <div className='w-123 h-144 ' ref={terminalRef} style={{textAlign:'left'}}>
         </div>
     )
 }

@@ -1,55 +1,32 @@
 import React,{useEffect, useRef, useState} from 'react'
 import Editor from '@monaco-editor/react';
-function CodeEditor({socket,isClicked}) {
- 
-    const valueCode=`import { WebSocketServer } from 'ws'; // Use require if not using "type": "module" in package.json
-
-const wss = new WebSocketServer({ port: 8080 });
-
-wss.on('connection', function connection(ws) {
-  console.log('A new client connected!');
-  ws.send('Welcome to the WebSocket server!'); // Send a welcome message to the client
-
-  ws.on('error', console.error);
-
-  ws.on('message', function message(data, isBinary) {
-    // Log the received message
-    console.log('received: %s', data);
-
-    // Broadcast the message to all connected clients
-    wss.clients.forEach(function each(client) {
-      if (client.readyState === ws.OPEN) {
-        client.send(data, { binary: isBinary });
-      }
-    });
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
-});
-
-console.log('WebSocket server is running on ws://localhost:8080');
-`
-   const EditorRef=useRef(null);
-    const [codex,setCodex]=useState('>');
+import {StarterCode} from './constants'
+function CodeEditor({socket,isClicked,lang}) {
+  const EditorRef=useRef(null);
+    const [codex,setCodex]=useState();
     const handleEditorMount=(editor)=>{
         EditorRef.current=editor;
     }
     const showValue=()=>{
-      alert(EditorRef.current.getValue());  
+      alert(EditorRef.current.getValue());        
     }
+    
     useEffect(()=>{
-        socket.emit('run-code',codex);
+      if(isClicked){
+        socket.emit('run-code',{code:codex,language:lang});
+      }
     },[isClicked])
+    useEffect(()=>{
+      setCodex(StarterCode[lang]);
+    },[lang])
     return (
         <div>
             <Editor 
             height="90vh"
             width="60vw"
-             defaultLanguage="javascript"
-              defaultValue={valueCode}
-              value={codex}
+             defaultLanguage="cpp"
+              defaultValue={StarterCode[lang]}
+              value={StarterCode[lang]}
               onChange={(newCode)=>{
                 setCodex(newCode)
                 socket.emit("message",codex)}}
