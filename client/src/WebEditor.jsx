@@ -1,7 +1,7 @@
 import React,{useEffect, useRef, useState} from 'react'
 import Editor from '@monaco-editor/react';
 import {StarterCode} from './constants'
-function CodeEditor({socket,isClicked,lang}) {
+function WebEditor({socket,isClicked,lang,setCode,code}) {
   const EditorRef=useRef(null);
     const [codex,setCodex]=useState();
     const handleEditorMount=(editor)=>{
@@ -26,10 +26,12 @@ function CodeEditor({socket,isClicked,lang}) {
             width="45vw"
              defaultLanguage="cpp"
               defaultValue={StarterCode[lang]}
-              value={StarterCode[lang]}
+              value={code}
               onChange={(newCode)=>{
                 setCodex(newCode)
-                socket.emit("message",codex)}}
+                setCode(newCode)
+                // socket.emit("message",codex)
+                }}
               theme='vs-dark'
               onMount={handleEditorMount}
               />
@@ -38,4 +40,4 @@ function CodeEditor({socket,isClicked,lang}) {
     )
 }
 
-export default CodeEditor
+export default WebEditor

@@ -1,0 +1,337 @@
+import { useEffect, useState } from 'react';
+import { Tree } from 'react-arborist';
+
+// Helper to handle nested updates (Recursive)
+const updateTreename=(tree,id,newname)=>{
+  return (
+    tree.map(node=>{
+       if(node.id===id){
+         return {...node,name:newname}
+       }
+       if(node.children){
+        return {
+          ...node,
+          children:updateTreename(node.children,id,newname)
+        }
+       }
+       return node;
+    })
+  )
+}
+const updateCodeFile=(tree,id,code)=>{
+    return (
+      tree.map(node=>{
+        if(node.id===id){
+          return {...node,value:code}
+        };
+        if (node.children) {
+      return { ...node, children: updateCodeFile(node.children, id, code) };
+    }
+        return node;
+      })
+    )
+}
+const addNodeToTree = (tree, parentId, newNode) => {
+  return tree.map((node) => {
+    if (node.id === parentId) {
+      // Found the folder! Return a copy with the new file added
+      return {
+        ...node,
+        children: [...(node.children || []), newNode],
+      };
+    }
+    if (node.children) {
+      // Not here, search deeper
+      return {
+        ...node,
+        children: addNodeToTree(node.children, parentId, newNode),
+      };
+    }
+    return node;
+  });
+};
+
+function Files({socket,setCode,code}) {
+  const [db,setDB]=useState(null);
+  const [data,setData] =useState([])
+  const [activeFileId,setActivefileId]=useState();
+  const [activeFolderId,setActiveFolderId]=useState();
+  //Initialize database
+  useEffect(()=>{
+    // indexedDB.open()
+    const request=window.indexedDB.open("IDE",1);
+    request.onerror = (event) => {
+    console.error("Why didn't you allow my web app to use IndexedDB?!");
+  };
+  
+  // onupgradeneeded → create store
+  request.onupgradeneeded=(event)=>{
+    const db=event.target.result;
+    if (!db.objectStoreNames.contains("data")) {
+    db.createObjectStore("data",{
+      keyPath:"id",
+    });
+  }
+  }
+  
+  // onsuccess
+  request.onsuccess = (event) => {
+    setDB(event.target.result);
+    readFiles(event.target.result);
+  };
+  },[])
+const addInitialFiles=()=>{
+  const transaction=db.transaction("data","readwrite");
+  const store=transaction.objectStore("data");
+  data.forEach(file=>{
+    store.put(file);
+  })
+};
+function readFiles(db){
+  const transaction=db.transaction("data","readonly");
+  const store=transaction.objectStore("data");
+  const request=store.get("root_structure");
+  request.onsuccess=()=>{
+    if(request.result){
+    setData(request.result.tree);
+    }else{
+      const initialData = [
+          {
+    id: "3",
+    name: "node_modules",
+    children: [
+      { id: "c1", name: "git" },
+      { id: "c2", name: "python" },
+      { id: "c3", name: "Open Source Projects"},
+    ],
+  },
+  {
+    id: "4",
+    name: "src",
+    children: [
+      { id: "d1", name: "App.jsx",value:`import React from 'react'
+        
+        function App() {
+          return (
+            
+          )
+          }
+          
+        export default App` },
+          { id: "d2", name: "App.css", value:"body{}" },
+          { id: "d3", name: "index.css",value:"#root{}"},
+        ],
+      },
+      { id: "1", name: "package.json",value:"{}" },
+      { id: "2", name: "package-lock.json",value:"{}" },
+        ];
+        setData(initialData);
+        saveToDB(db,initialData);
+    }
+  }
+}
+
+useEffect(()=>{
+  if (activeFileId && code !== undefined) {
+  handleUpdatedCode(code);}
+},[code])
+
+const saveToDB = (database, treeData) => {
+    if (!database) return;
+    const tx = database.transaction("data", "readwrite");
+    tx.objectStore("data").put({ id: "root_structure", tree: treeData });
+    console.log("db",db);
+  };
+
+  const handleRename=({id,name})=>{
+     const newData=updateTreename(data,id,name);
+     setData(newData);
+     saveToDB(db,newData)
+  }
+  const handleUpdatedCode=(code)=>{
+    if(!activeFileId) return;
+    setData(prev=>{
+      const newData=updateCodeFile(prev,activeFileId,code)
+      saveToDB(db,newData);
+      return newData;
+    });
+  }
+const createfile = (activeFolderId) => {
+  const newFile = { 
+    id: Date.now().toString(), 
+    name: "new-file.txt", 
+    value: "" 
+  };
+
+  setData((prev) => {
+    let newData;
+    if (!activeFolderId) {
+      newData = [...prev, newFile];
+    } else {
+      newData = addNodeToTree(prev, activeFolderId, newFile);
+    }
+    
+    saveToDB(db, newData);
+    return newData;
+  });
+};
+const createFolder=(activeFolderId)=>{
+      const newFolder={id:Date.now().toString(),name:"new-folder",children:[]}
+     setData((prev) => {
+    let newData;
+    if (!activeFolderId) {
+      newData = [...prev, newFolder];
+    } else {
+      newData = addNodeToTree(prev, activeFolderId, newFolder);
+    }
+    saveToDB(db, newData);
+    return newData;
+  });
+     console.log('created folder',data);
+   }
+
+const deleteFile = (idToDelete) => {
+  // 1. Create a true copy
+  const copiedData = [...data]; 
+  
+  // 2. Filter top level (fixed the .id access)
+  const newUpdate = copiedData.filter(node => node.id !== idToDelete);
+  
+  setData(newUpdate);
+  saveToDB(db, newUpdate);
+};
+
+const deleteFolder = (idToDelete) => {
+  // This is essentially the same as deleteFile if we only look at the root
+  const newUpdate = data.filter(node => node.id !== idToDelete);
+  setData(newUpdate);
+  saveToDB(db, newUpdate);
+};
+
+// const deleteNode = (idToDelete) => {
+//   const recursiveFilter = (nodes) => {
+//     return nodes
+//       .filter((node) => node.id !== idToDelete) // Remove the node if it matches
+//       .map((node) => {
+//         // If the node has children, filter those too
+//         if (node.children) {
+//           return { ...node, children: recursiveFilter(node.children) };
+//         }
+//         return node;
+//       });
+//   };
+
+//   setData((prevData) => {
+//     const newData = recursiveFilter(prevData);
+//     saveToDB(db, newData);
+//     return newData;
+//   });
+// };
+
+  return (
+    <div className='bg-gray-600'>
+      <div className='bg-gray-500 flex justify-between rounded-sm m-2'>
+        <p className='font-extrabold text-white ml-2'>Replit</p>
+        <div className='flex gap-2 mr-2'>
+      <button className='w-6 cursor-pointer' onClick={()=>createfile(activeFolderId)}><img src="file.png"/></button>
+      <button className='w-6 cursor-pointer' onClick={()=>createFolder(activeFolderId)}><img src="folder.png"/></button>
+        </div>
+      </div>
+    <Tree
+      // initialData={data}
+      data={data} 
+      openByDefault={false}
+      width={200}
+      height={540}
+      indent={24}
+      rowHeight={36}
+      overscanCount={1}
+      paddingTop={30}
+      paddingBottom={10}
+      editable
+      onRename={handleRename}
+    >
+      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId}/>}
+    </Tree>
+    </div>
+);
+}
+
+export default Files
+
+
+function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId}) {
+  return (
+    <div
+      style={style}
+      ref={dragHandle}
+      className={`flex items-center px-2 cursor-pointer hover:bg-gray-700 text-white
+        ${node.isSelected ?'bg-blue-300':'hover:bg-gray-300'}`}
+      onClick={() => {
+        if(node.isLeaf){
+          setCode(node.data.value)
+          setActivefileId(node.data.id)
+          console.log("code file ka ==>",node.data.value);
+        }
+        if (!node.isLeaf) {
+          setActiveFolderId(node.data.id)
+          console.log("folder ka id ==>",node.data.id);
+          node.toggle();   // 🔥 THIS opens/closes folder
+        }
+      }}
+
+    >
+      <span className="mr-2">
+        {node.isLeaf ? "📄" : node.isOpen ? "📂" : "📁"}
+      </span>
+       {/* Rename */}
+      {node.isEditing?(
+         <input autoFocus defaultValue={node.data.name} 
+         onBlur={(e)=>node.submit(e.target.value)}
+         onKeyDown={(e)=>{
+          if(e.key==='Enter') node.submit(e.target.value);
+           if(e.key==='Escape') node.reset(); 
+         }}
+          className="bg-gray-800 outline-none px-1"
+         />
+      ):(
+    <div 
+  className='flex  justify-between w-45 group' 
+  onDoubleClick={(e) => {
+    e.stopPropagation(); 
+    node.edit();
+  }}
+>
+  <span className="truncate flex-1 text-sm">
+    {node.data.name}
+  </span>
+
+
+  <button 
+    onClick={(e) => {
+      e.stopPropagation();
+     if (node.isLeaf) {
+      deleteFile(node.id);
+    } else {
+      // 2. Added a quick confirm for folders because they might contain files
+      if (window.confirm(`Delete folder "${node.data.name}"?`)) {
+        deleteFolder(node.id);
+      }
+    }
+    //  deleteNode(node.id)
+    }}
+    className="opacity-0 group-hover:opacity-100 hover:scale-110 transition-all"
+  >
+    <img 
+      src='bin.png' 
+      style={{ width: '14px', height: '14px', filter: 'invert(1)' }} 
+      alt="delete"
+    />
+  </button>
+</div>
+      )}
+
+    </div>
+  );
+}
+
