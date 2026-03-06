@@ -23,7 +23,7 @@ function CodeEditor({socket,isClicked,lang}) {
         <div>
             <Editor 
             height="92vh"
-            width="45vw"
+            width="60vw"
              defaultLanguage="cpp"
               defaultValue={StarterCode[lang]}
               value={StarterCode[lang]}

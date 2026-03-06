@@ -51,7 +51,7 @@ const addNodeToTree = (tree, parentId, newNode) => {
   });
 };
 
-function Files({socket,setCode,code}) {
+function Files({socket,setCode,code,isClicked,setIsClicked}) {
   const [db,setDB]=useState(null);
   const [data,setData] =useState([])
   const [activeFileId,setActivefileId]=useState();
@@ -95,36 +95,121 @@ function readFiles(db){
     if(request.result){
     setData(request.result.tree);
     }else{
-      const initialData = [
-          {
-    id: "3",
-    name: "node_modules",
+       const initialData = [
+  {
+    id: "1",
+    name: "src",
     children: [
-      { id: "c1", name: "git" },
-      { id: "c2", name: "python" },
-      { id: "c3", name: "Open Source Projects"},
-    ],
+      {
+        id: "d1",
+        name: "main.jsx",
+        value: `import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.jsx'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)`
+      },
+      {
+        id: "d2",
+        name: "App.jsx",
+        value: `import React from 'react'
+import './App.css'
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Hello from CodeAny!</h1>
+      <p>Edit this file to see magic happen.</p>
+    </div>
+  )
+}
+
+export default App`
+      },
+      {
+        id: "d3",
+        name: "App.css",
+        value: `.App { text-align: center; background-color: #282c34; min-height: 100vh; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }`
+      },
+      {
+        id: "d4",
+        name: "index.css",
+        value: `body { margin: 0; font-family: sans-serif; }`
+      }
+    ]
+  },
+  {
+    id: "2",
+    name: "index.html",
+    value: `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>`
+  },
+  {
+    id: "3",
+    name: "vite.config.js",
+    value: `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react-swc'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    host: '0.0.0.0',
+    port: 5174,
+    hmr: {
+      clientPort: 5174 // Ensures hot reload works inside the iframe
+    },
+    headers: {
+      "Content-Security-Policy": "frame-ancestors 'self' http://localhost:8080 http://localhost:3000",
+    },
+    watch: {
+      usePolling: true
+    }
+  }
+})`
   },
   {
     id: "4",
-    name: "src",
-    children: [
-      { id: "d1", name: "App.jsx",value:`import React from 'react'
-        
-        function App() {
-          return (
-            
-          )
-          }
-          
-        export default App` },
-          { id: "d2", name: "App.css", value:"body{}" },
-          { id: "d3", name: "index.css",value:"#root{}"},
-        ],
+    name: "package-lock.json",
+    value: `{ "name": "vite-react-app", "lockfileVersion": 3 }`
+  },
+  {
+    id: "5",
+    name: "package.json",
+    value: JSON.stringify({
+      name: "vite-react-app",
+      private: true,
+      version: "0.0.0",
+      type: "module",
+      scripts: {
+        "dev": "vite",
+        "build": "vite build"
       },
-      { id: "1", name: "package.json",value:"{}" },
-      { id: "2", name: "package-lock.json",value:"{}" },
-        ];
+      dependencies: {
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0"
+      },
+      devDependencies: {
+        "@vitejs/plugin-react-swc": "^3.5.0",
+        "vite": "^5.0.0"
+      }
+    }, null, 2)
+  }
+];
         setData(initialData);
         saveToDB(db,initialData);
     }
@@ -133,14 +218,27 @@ function readFiles(db){
 
 useEffect(()=>{
   if (activeFileId && code !== undefined) {
-  handleUpdatedCode(code);}
+  handleUpdatedCode(code);
+   }
 },[code])
+
+useEffect(()=>{
+  if(isClicked){
+    console.log("clicked",isClicked);
+        socket.emit("sync-full-project",{
+      files:data,
+      language:"react"
+    })
+  }
+  setIsClicked(false);
+},[isClicked])
 
 const saveToDB = (database, treeData) => {
     if (!database) return;
     const tx = database.transaction("data", "readwrite");
     tx.objectStore("data").put({ id: "root_structure", tree: treeData });
     console.log("db",db);
+      console.log("codeFiles",data);
   };
 
   const handleRename=({id,name})=>{

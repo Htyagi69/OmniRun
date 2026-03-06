@@ -29,4 +29,12 @@ export const LanguageRuntimes={
         Compilecmd:'node user_code.js\r',
         fileName:'user_code.js'
     },
+    react: {
+    image: 'node:20-bookworm-slim',
+    shell: 'bash',
+    isProject: true, // This tells your backend: "Wait, this needs more than one file!"
+    port: 5174,      // The port Vite uses
+    compileCmd: 'npm install && npm run dev -- --host\r',
+    fileName: 'src/App.jsx'
+}
 }

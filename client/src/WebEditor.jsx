@@ -12,11 +12,6 @@ function WebEditor({socket,isClicked,lang,setCode,code}) {
     }
     
     useEffect(()=>{
-      if(isClicked){
-        socket.emit('run-code',{code:codex,language:lang});
-      }
-    },[isClicked])
-    useEffect(()=>{
       setCodex(StarterCode[lang]);
     },[lang])
     return (
@@ -24,7 +19,7 @@ function WebEditor({socket,isClicked,lang,setCode,code}) {
             <Editor 
             height="92vh"
             width="45vw"
-             defaultLanguage="cpp"
+             defaultLanguage="javascript"
               defaultValue={StarterCode[lang]}
               value={code}
               onChange={(newCode)=>{

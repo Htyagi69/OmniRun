@@ -36,7 +36,7 @@ io.on('connection',(ws)=>{
 
 let lang=null;
 let ptyProcess=null;
-const startDocker=(language)=>{
+const startDockerForCompiler=(language)=>{
     if(ptyProcess){
         ptyProcess.kill();
         ptyProcess=null;
@@ -64,6 +64,40 @@ ptyProcess.onData((data)=>{
     ws.emit('terminal-output',data)
 })
 }
+const startDockerForWebsite=(language)=>{
+    if(ptyProcess){
+        ptyProcess.kill();
+        ptyProcess=null;
+    }
+        //PTY process
+    const runtime=LanguageRuntimes[language];
+    const dockerArgs = [
+    'run', '-it', '--rm',
+    '--memory', '512m',
+    '--cpus', '0.5',
+    // THIS IS THE KEY PART:
+    '-v', `${userFolder}:/app`,  // Map host userFolder to container /app
+    '-w', '/app',                // Tell Docker to start inside /app
+];
+// Add this so the iframe can actually see the website!
+if (runtime.port) {
+    dockerArgs.push('-p', `${runtime.port}:${runtime.port}`);
+}
+
+dockerArgs.push(runtime.image, runtime.shell);
+     ptyProcess=pty.spawn('docker',dockerArgs,{
+    name:'xterm-color',
+    rows:30,
+    cols:80,
+    cwd:process.env.HOME,
+    env:process.env
+})
+
+ptyProcess.onData((data)=>{
+    // process.stdout.write(data);
+    ws.emit('terminal-output',data)
+})
+}
 
 ws.on('message',(data)=>{
     console.log(`received`,data);
@@ -72,7 +106,7 @@ ws.on('message',(data)=>{
 ws.on('run-code',({code,language})=>{
     lang=language;
     let runtime=LanguageRuntimes[lang];
-    startDocker(lang);
+    startDockerForCompiler(lang);
     console.log("code=====>",code);
     console.log("language",language);
     
@@ -87,6 +121,38 @@ ws.on('run-code',({code,language})=>{
             ptyProcess.write(runtime.Compilecmd);
         },1000)
     })
+
+ ws.on("sync-full-project",({files,language})=>{
+     
+     const writeFilesInLocal=(basePath,items)=>{
+         items.forEach(item => {
+             const currentPath=path.join(basePath,item.name);
+             if(item.children){
+                 if (!fs.existsSync(currentPath)) {
+                     fs.mkdirSync(currentPath, { recursive: true });
+                 }                      
+                     writeFilesInLocal(currentPath,item.children);
+                    }else{
+                        console.log(`Writing file: ${item.name} to ${currentPath}`);
+                        fs.writeFileSync(currentPath, item.value || "");
+                    }
+                }
+            );
+            // console.log("CodeFiles",files);
+        }
+        writeFilesInLocal(userFolder,files);
+    console.log(`Project synced for ${ws.id}`);
+    startDockerForWebsite(language);
+    // Instead of just npm run dev, check if install is needed
+const installCmd = fs.existsSync(path.join(userFolder, 'node_modules')) 
+    ? "" 
+    : "npm install && ";
+
+// Use a small timeout to let the container shell boot up
+setTimeout(() => {
+    ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
+}, 1000);
+ })   
     ws.on('terminal-input',(userInput)=>{
         if(ptyProcess)
         ptyProcess.write(userInput);
