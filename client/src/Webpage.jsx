@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import WebEditor from './WebEditor'
 import './App.css'
 import TerminalBox from './terminal'
@@ -9,12 +9,18 @@ function Website({socket}){
   const [lang,setLang]=useState('javascript');
   const [code,setCode]=useState();
   const [isClicked,setIsClicked]=useState(false);
+  const [loadSite,setLoadSite]=useState(false);
   // socket.on('message',data=>{
   //   setMessages((prev)=>[...prev,data])
   //   console.log("mess:",messages);
   //   // socket.emit('message',messages)
   // })
 
+  useEffect(()=>{
+    if(isClicked) setTimeout(()=>{
+      setLoadSite(true);
+    },7000)
+  },[isClicked])
   return (
     <div className=' bg-green-400' >
     {/* <h1 className='text-green-600 text-4xl font-extrabold'>OmniVerse</h1> */}
@@ -36,7 +42,7 @@ function Website({socket}){
       </div>
     </div>
     <div className='w-full bg-black border-2 '>
-      <iframe src="http://localhost:5174" width="1250px"></iframe>
+      {loadSite?(<iframe src="http://localhost:5174" width="1250px" height="620px"></iframe>):(<div className='bg-black text-white font-bold'>Starting server... Please wait</div>)}
       {/* <iframe src="https://code-editor-blwn.vercel.app/" width="1250px"></iframe> */}
     </div>
     </div>
