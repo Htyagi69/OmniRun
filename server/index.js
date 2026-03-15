@@ -70,7 +70,7 @@ const startDockerForWebsite=(language)=>{
         ptyProcess=null;
     }
         //PTY process
-    const runtime=LanguageRuntimes[language];
+   const runtime = LanguageRuntimes[language.toLowerCase()];
     const dockerArgs = [
     'run', '-it', '--rm',
     '--memory', '512m',
@@ -80,9 +80,8 @@ const startDockerForWebsite=(language)=>{
     '-w', '/app',                // Tell Docker to start inside /app
 ];
 // Add this so the iframe can actually see the website!
-if (runtime.port) {
-    dockerArgs.push('-p', `${runtime.port}:${runtime.port}`);
-}
+const port = runtime.port || 5174;
+    dockerArgs.push('-p', `${port}:${port}`);
 
 dockerArgs.push(runtime.image, runtime.shell);
      ptyProcess=pty.spawn('docker',dockerArgs,{
@@ -140,19 +139,41 @@ ws.on('run-code',({code,language})=>{
             );
             // console.log("CodeFiles",files);
         }
-        writeFilesInLocal(userFolder,files);
-    console.log(`Project synced for ${ws.id}`);
-    startDockerForWebsite(language);
-    // Instead of just npm run dev, check if install is needed
-const installCmd = fs.existsSync(path.join(userFolder, 'node_modules')) 
-    ? "" 
-    : "npm install && ";
 
-// Use a small timeout to let the container shell boot up
-setTimeout(() => {
-    ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
-}, 1000);
- })   
+        writeFilesInLocal(userFolder,files);
+        console.log(`Project synced for ${ws.id}`);
+        
+        startDockerForWebsite(language);
+        //For instant boot up we preinstalled npm i in docker
+        let runtime=LanguageRuntimes[language];
+        setTimeout(() => {
+    // ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
+    ptyProcess.write(`${runtime.Compilecmd}`);
+    
+    }, 1000);
+
+    //********For setup the complete project using itself npm install on everry project run 
+    // Instead of just npm run dev, check if install is needed
+        //       const installCmd = fs.existsSync(path.join(userFolder, 'node_modules')) 
+        //     ? "" 
+        //     : "npm install && ";
+        
+        // // Use a small timeout to let the container shell boot up
+        // setTimeout(() => {
+        //     ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
+        // }, 1000);
+ })
+ 
+ ws.on('update-File',({filePath,content})=>{
+    if (!filePath || content === undefined) {
+        console.error("Invalid file update received:", { filePath, content });
+        return; 
+    }
+    const absolutePath=path.join(userFolder,filePath);
+    fs.writeFileSync(absolutePath,content);
+    console.log(`content:${content}`);
+    console.log(`File updated:${filePath}`);
+ })
     ws.on('terminal-input',(userInput)=>{
         if(ptyProcess)
         ptyProcess.write(userInput);

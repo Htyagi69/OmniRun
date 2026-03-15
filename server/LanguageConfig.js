@@ -29,12 +29,22 @@ export const LanguageRuntimes={
         Compilecmd:'node user_code.js\r',
         fileName:'user_code.js'
     },
-    react: {
-    image: 'node:20-bookworm-slim',
-    shell: 'bash',
-    isProject: true, // This tells your backend: "Wait, this needs more than one file!"
-    port: 5174,      // The port Vite uses
-    compileCmd: 'npm install && npm run dev -- --host\r',
-    fileName: 'src/App.jsx'
-}
+//     react: {
+//     image: 'node:20-bookworm-slim',
+//     shell: 'bash',
+//     isProject: true, // This tells your backend: "Wait, this needs more than one file!"
+//     port: 5174,      // The port Vite uses
+//     compileCmd: 'npm install && npm run dev -- --host\r',
+//     fileName: 'src/App.jsx'
+// }
+
+       react:{
+        image:'react-base-image',//new custom image
+        shell:'bash',
+        port:5174,
+        // 1. Create a link from the base modules to the current folder
+        // 2. Start Vite immediately (NO npm install needed!)
+        Compilecmd:'ln -s /base/node_modules /app/node_modules && npm run dev -- --host --port 5174\r',
+        fileName:'src/App.jsx'
+       }
 }
