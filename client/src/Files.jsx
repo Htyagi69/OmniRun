@@ -56,6 +56,7 @@ function Files({socket,setCode,code,isClicked,setIsClicked}) {
   const [data,setData] =useState([])
   const [activeFileId,setActivefileId]=useState();
   const [activeFolderId,setActiveFolderId]=useState();
+  const [activefileName,setActivefileName]=useState('src/App.jsx');
   //Initialize database
   useEffect(()=>{
     // indexedDB.open()
@@ -174,10 +175,11 @@ export default defineConfig({
       clientPort: 5174 // Ensures hot reload works inside the iframe
     },
     headers: {
-      "Content-Security-Policy": "frame-ancestors 'self' http://localhost:8080 http://localhost:3000",
+      "Content-Security-Policy": "frame-ancestors 'self' *;",
     },
     watch: {
-      usePolling: true
+      usePolling: true,
+      interval:100
     }
   }
 })`
@@ -232,6 +234,13 @@ useEffect(()=>{
   }
   setIsClicked(false);
 },[isClicked])
+
+   useEffect(()=>{
+  socket.emit('update-File',{
+    filePath:activefileName,
+    content:code,
+  })
+},[code])
 
 const saveToDB = (database, treeData) => {
     if (!database) return;
@@ -349,7 +358,7 @@ const deleteFolder = (idToDelete) => {
       editable
       onRename={handleRename}
     >
-      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId}/>}
+      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId} setActivefileName={setActivefileName}/>}
     </Tree>
     </div>
 );
@@ -358,7 +367,7 @@ const deleteFolder = (idToDelete) => {
 export default Files
 
 
-function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId}) {
+function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId,setActivefileName}) {
   return (
     <div
       style={style}
@@ -369,6 +378,7 @@ function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActiv
         if(node.isLeaf){
           setCode(node.data.value)
           setActivefileId(node.data.id)
+          setActivefileName(node.data.name)
           console.log("code file ka ==>",node.data.value);
         }
         if (!node.isLeaf) {

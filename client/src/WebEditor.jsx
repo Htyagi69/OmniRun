@@ -14,6 +14,7 @@ function WebEditor({socket,isClicked,lang,setCode,code}) {
     useEffect(()=>{
       setCodex(StarterCode[lang]);
     },[lang])
+
     return (
         <div>
             <Editor 
