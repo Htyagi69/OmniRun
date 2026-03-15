@@ -106,7 +106,7 @@ ws.on('run-code',({code,language})=>{
     lang=language;
     let runtime=LanguageRuntimes[lang];
     startDockerForCompiler(lang);
-    console.log("code=====>",code);
+    // console.log("code=====>",code);
     console.log("language",language);
     
     // const filePath=path.join(userFolder,'user_code.cpp');
@@ -170,6 +170,11 @@ ws.on('run-code',({code,language})=>{
         return; 
     }
     const absolutePath=path.join(userFolder,filePath);
+    const directoryPath=path.dirname(absolutePath)
+    if(!fs.existsSync(directoryPath)){
+        fs.mkdirSync(directoryPath, {recursive:true});
+        console.log(`Created missing directory: ${directoryPath}`);
+    }
     fs.writeFileSync(absolutePath,content);
     console.log(`content:${content}`);
     console.log(`File updated:${filePath}`);

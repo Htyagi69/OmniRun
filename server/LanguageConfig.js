@@ -46,5 +46,14 @@ export const LanguageRuntimes={
         // 2. Start Vite immediately (NO npm install needed!)
         Compilecmd:'ln -s /base/node_modules /app/node_modules && npm run dev -- --host --port 5174\r',
         fileName:'src/App.jsx'
-       }
+       },
+       node: {
+    image: 'node:20-alpine', // Light-weight Node image
+    shell: 'sh',
+    port: 8081, // Use a different port than your main server
+    // Command to link modules and start with watch mode
+    Compilecmd: 'ln -s /base/node_modules /app/node_modules && node --watch index.js\r',
+    fileName: 'index.js'
+    }
 }
+   
