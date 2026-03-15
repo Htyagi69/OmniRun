@@ -166,7 +166,7 @@ export default App`
     id: "3",
     name: "vite.config.js",
     value: `import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
@@ -214,6 +214,28 @@ export default defineConfig({
     }, null, 2)
   }
 ];
+
+const nodeInitialData = [
+  {
+    id: "1",
+    name: "index.js",
+    value: `const http = require('http');
+const server = http.createServer((req, res) => {
+  res.end('Hello from your custom Node server!');
+});
+server.listen(8081, () => console.log('Server running on port 8081'));`
+  },
+  {
+    id: "2",
+    name: "package.json",
+    value: JSON.stringify({
+      name: "node-app",
+      type: "commonjs",
+      dependencies: {}
+    }, null, 2)
+  }
+];
+
         setData(initialData);
         saveToDB(db,initialData);
     }
@@ -318,43 +340,43 @@ const createFolder=(activeFolderId)=>{
   return null;
 };
 
-const deleteFile = (idToDelete) => {
-  // 1. Create a true copy
-  const copiedData = [...data]; 
+// const deleteFile = (idToDelete) => {
+//   // 1. Create a true copy
+//   const copiedData = [...data]; 
   
-  // 2. Filter top level (fixed the .id access)
-  const newUpdate = copiedData.filter(node => node.id !== idToDelete);
+//   // 2. Filter top level (fixed the .id access)
+//   const newUpdate = copiedData.filter(node => node.id !== idToDelete);
   
-  setData(newUpdate);
-  saveToDB(db, newUpdate);
-};
-
-const deleteFolder = (idToDelete) => {
-  // This is essentially the same as deleteFile if we only look at the root
-  const newUpdate = data.filter(node => node.id !== idToDelete);
-  setData(newUpdate);
-  saveToDB(db, newUpdate);
-};
-
-// const deleteNode = (idToDelete) => {
-//   const recursiveFilter = (nodes) => {
-//     return nodes
-//       .filter((node) => node.id !== idToDelete) // Remove the node if it matches
-//       .map((node) => {
-//         // If the node has children, filter those too
-//         if (node.children) {
-//           return { ...node, children: recursiveFilter(node.children) };
-//         }
-//         return node;
-//       });
-//   };
-
-//   setData((prevData) => {
-//     const newData = recursiveFilter(prevData);
-//     saveToDB(db, newData);
-//     return newData;
-//   });
+//   setData(newUpdate);
+//   saveToDB(db, newUpdate);
 // };
+
+// const deleteFolder = (idToDelete) => {
+//   // This is essentially the same as deleteFile if we only look at the root
+//   const newUpdate = data.filter(node => node.id !== idToDelete);
+//   setData(newUpdate);
+//   saveToDB(db, newUpdate);
+// };
+
+const deleteNode = (idToDelete) => {
+  const recursiveFilter = (nodes) => {
+    return nodes
+      .filter((node) => node.id !== idToDelete) // Remove the node if it matches
+      .map((node) => {
+        // If the node has children, filter those too
+        if (node.children) {
+          return { ...node, children: recursiveFilter(node.children) };
+        }
+        return node;
+      });
+  };
+
+  setData((prevData) => {
+    const newData = recursiveFilter(prevData);
+    saveToDB(db, newData);
+    return newData;
+  });
+};
 
   return (
     <div className='bg-gray-600'>
@@ -379,7 +401,7 @@ const deleteFolder = (idToDelete) => {
       editable
       onRename={handleRename}
     >
-      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId} setActivefileName={setActivefileName} setPath={setPath}/>}
+      {(props)=><Node {...props} setCode={setCode}  deleteNode={deleteNode}  setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId} setActivefileName={setActivefileName} setPath={setPath}/>}
     </Tree>
     </div>
 );
@@ -388,7 +410,7 @@ const deleteFolder = (idToDelete) => {
 export default Files
 
 
-function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId,setActivefileName,setPath}) {
+function Node({ node, style, dragHandle,setCode,deleteNode,setActivefileId,setActiveFolderId,setActivefileName,setPath}) {
 
     let getFullPath=(currentNode)=>{
         const pathparts=[];
@@ -453,11 +475,11 @@ function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActiv
     onClick={(e) => {
       e.stopPropagation();
      if (node.isLeaf) {
-      deleteFile(node.id);
+      deleteNode(node.data.id);
     } else {
       // 2. Added a quick confirm for folders because they might contain files
       if (window.confirm(`Delete folder "${node.data.name}"?`)) {
-        deleteFolder(node.id);
+        deleteNode(node.id);
       }
     }
     //  deleteNode(node.id)
