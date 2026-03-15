@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState,useRef } from 'react';
 import { Tree } from 'react-arborist';
 
 // Helper to handle nested updates (Recursive)
@@ -57,6 +57,7 @@ function Files({socket,setCode,code,isClicked,setIsClicked}) {
   const [activeFileId,setActivefileId]=useState();
   const [activeFolderId,setActiveFolderId]=useState();
   const [activefileName,setActivefileName]=useState('src/App.jsx');
+  const [path,setPath]=useState("/");
   //Initialize database
   useEffect(()=>{
     // indexedDB.open()
@@ -100,6 +101,7 @@ function readFiles(db){
   {
     id: "1",
     name: "src",
+    hierarcy:1,
     children: [
       {
         id: "d1",
@@ -222,6 +224,8 @@ useEffect(()=>{
   if (activeFileId && code !== undefined) {
   handleUpdatedCode(code);
    }
+   console.log(`path:${path}`);
+   
 },[code])
 
 useEffect(()=>{
@@ -237,7 +241,7 @@ useEffect(()=>{
 
    useEffect(()=>{
   socket.emit('update-File',{
-    filePath:activefileName,
+    filePath:path,
     content:code,
   })
 },[code])
@@ -283,12 +287,17 @@ const createfile = (activeFolderId) => {
   });
 };
 const createFolder=(activeFolderId)=>{
-      const newFolder={id:Date.now().toString(),name:"new-folder",children:[]}
+      const newFolder={id:Date.now().toString(),name:"new-folder",hierarcy:1,children:[]}
      setData((prev) => {
     let newData;
     if (!activeFolderId) {
       newData = [...prev, newFolder];
     } else {
+          const parentNode = findNode(prev, activeFolderId);
+          const newHierarchy = parentNode.hierarcy + 1;
+      // console.log('hierarcy',newHierarchy);
+    
+      newFolder.hierarcy=newHierarchy;
       newData = addNodeToTree(prev, activeFolderId, newFolder);
     }
     saveToDB(db, newData);
@@ -296,6 +305,18 @@ const createFolder=(activeFolderId)=>{
   });
      console.log('created folder',data);
    }
+
+   const findNode = (tree, id) => {
+  for (let node of tree) {
+    if (node.id === id) return node;
+
+    if (node.children) {
+      const found = findNode(node.children, id);
+      if (found) return found;
+    }
+  }
+  return null;
+};
 
 const deleteFile = (idToDelete) => {
   // 1. Create a true copy
@@ -358,7 +379,7 @@ const deleteFolder = (idToDelete) => {
       editable
       onRename={handleRename}
     >
-      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId} setActivefileName={setActivefileName}/>}
+      {(props)=><Node {...props} setCode={setCode}  deleteFile={deleteFile} deleteFolder={deleteFolder} setActivefileId={setActivefileId} setActiveFolderId={setActiveFolderId} setActivefileName={setActivefileName} setPath={setPath}/>}
     </Tree>
     </div>
 );
@@ -367,7 +388,17 @@ const deleteFolder = (idToDelete) => {
 export default Files
 
 
-function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId,setActivefileName}) {
+function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActivefileId,setActiveFolderId,setActivefileName,setPath}) {
+
+    let getFullPath=(currentNode)=>{
+        const pathparts=[];
+        let curr=currentNode;
+        while(curr && !curr.isRoot){
+          pathparts.unshift(curr.data.name) //Array ko shuru me add karo
+          curr=curr.parent; 
+        }   
+        return pathparts.join('/');
+    }
   return (
     <div
       style={style}
@@ -376,15 +407,18 @@ function Node({ node, style, dragHandle,setCode,deleteFile,deleteFolder,setActiv
         ${node.isSelected ?'bg-blue-300':'hover:bg-gray-300'}`}
       onClick={() => {
         if(node.isLeaf){
+          const fullPath=getFullPath(node);
           setCode(node.data.value)
           setActivefileId(node.data.id)
           setActivefileName(node.data.name)
-          console.log("code file ka ==>",node.data.value);
+          setPath(fullPath);
+          console.log("path",fullPath);
+          // console.log("code file ka ==>",node.data.value);
         }
         if (!node.isLeaf) {
           setActiveFolderId(node.data.id)
-          console.log("folder ka id ==>",node.data.id);
-          node.toggle();   // 🔥 THIS opens/closes folder
+          // console.log("folder ka id ==>",node.data.id);
+          node.toggle();   //  THIS opens/closes folder
         }
       }}
 

@@ -10,17 +10,7 @@ function Website({socket}){
   const [code,setCode]=useState();
   const [isClicked,setIsClicked]=useState(false);
   const [loadSite,setLoadSite]=useState(false);
-  // socket.on('message',data=>{
-  //   setMessages((prev)=>[...prev,data])
-  //   console.log("mess:",messages);
-  //   // socket.emit('message',messages)
-  // })
 
-  useEffect(()=>{
-    if(isClicked) setTimeout(()=>{
-      setLoadSite(true);
-    },7000)
-  },[isClicked])
   return (
     <div className=' bg-green-400' >
     {/* <h1 className='text-green-600 text-4xl font-extrabold'>OmniVerse</h1> */}
@@ -38,7 +28,7 @@ function Website({socket}){
          <Files socket={socket} setCode={setCode} code={code} isClicked={isClicked} setIsClicked={setIsClicked}/>
      <WebEditor socket={socket} isClicked={isClicked} lang={lang} setCode={setCode} code={code}/>
      <div className='flex flex-col border-2'>
-     <TerminalBox socket={socket} setIsClicked={setIsClicked} />
+     <TerminalBox socket={socket} setIsClicked={setIsClicked}  setPreview={setLoadSite}/>
       </div>
     </div>
     <div className='w-full bg-black border-2 '>

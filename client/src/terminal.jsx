@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
 
-function TerminalBox({socket,setIsClicked}) {
+function TerminalBox({socket,setIsClicked,setPreview}) {
     const terminalRef=useRef(null);
     const xtermInstance=useRef(null);
     useEffect(()=>{
@@ -31,6 +31,11 @@ function TerminalBox({socket,setIsClicked}) {
                }
         })
          const handleOutput=(serverData)=>{
+            // console.log('state got it',serverData.includes('ready in'));
+            if(serverData.includes('ready in')){
+                setPreview(true);
+            }
+            console.log(serverData);
             term.write(serverData)
             setIsClicked(false);
          }
