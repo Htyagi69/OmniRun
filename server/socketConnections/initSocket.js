@@ -6,6 +6,7 @@ import { UpdateFile } from "./updateFile.js";
 import { runCode } from "./runTrigger.js";
 import { terminalInput } from "./Terminalinput.js";
 import {diconnection} from "./disconnect.js"
+import { handleAuth } from "../Auth/Supabase.js";
 
 export const init=(server,codeFolder)=>{
 
@@ -17,6 +18,7 @@ const io=new Server(server,{
   }
 })
 io.on('connection',(ws)=>{
+    // await handleAuth(ws);
     console.log('A new client is connected',ws.id);
     ws.on('error',console.error)
 

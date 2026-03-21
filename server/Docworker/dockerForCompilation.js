@@ -27,6 +27,7 @@ export const startDockerForCompiler=(language,ptyContainer,codeFolder,ws)=>{
 })
 
 ptyContainer.process.onData((data)=>{
+        console.log("data in terminal",data)
     // process.stdout.write(data);
     ws.emit('terminal-output',data)
 })

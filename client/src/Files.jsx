@@ -253,20 +253,24 @@ useEffect(()=>{
 useEffect(()=>{
   if(isClicked){
     console.log("clicked",isClicked);
+    if(socket){
         socket.emit("sync-full-project",{
       files:data,
       language:"react"
     })
   }
+  }
   setIsClicked(false);
 },[isClicked])
 
    useEffect(()=>{
+   if (socket && typeof socket.emit === 'function') {
   socket.emit('update-File',{
     filePath:path,
     content:code,
   })
-},[code])
+}
+},[code,socket])
 
 const saveToDB = (database, treeData) => {
     if (!database) return;
@@ -379,7 +383,7 @@ const deleteNode = (idToDelete) => {
 };
 
   return (
-    <div className='bg-gray-600'>
+    <div className='bg-black'>
       <div className='bg-gray-500 flex justify-between rounded-sm m-2'>
         <p className='font-extrabold text-white ml-2'>Replit</p>
         <div className='flex gap-2 mr-2'>

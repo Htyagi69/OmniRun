@@ -19,14 +19,15 @@ function TerminalBox({socket,setIsClicked,setPreview}) {
     });
         xtermInstance.current=term;
         term.onData((input)=>{
-              if (input === '\r') {
+              if (input === '\r' && socket) {
                   socket.emit('terminal-input', '\r\n'); // Move to next line
                       } 
     // Detect Backspace
-             else if (input === '\x7f') {
+             else if (input === '\x7f' && socket) {
                    socket.emit('terminal-input', '\b \b'); // Move back, space (erase), move back
                } 
              else {
+                   if(socket)
                     socket.emit('terminal-input', input);
                }
         })
@@ -38,7 +39,7 @@ function TerminalBox({socket,setIsClicked,setPreview}) {
             console.log(serverData);
             term.write(serverData)
             setIsClicked(false);
-         }
+        }
          socket.on('terminal-output',handleOutput)
         return ()=>{
             socket.off('terminal-output',handleOutput)

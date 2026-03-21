@@ -12,7 +12,7 @@ function CodeEditor({socket,isClicked,lang}) {
     }
     
     useEffect(()=>{
-      if(isClicked){
+      if(isClicked && socket){
         socket.emit('run-code',{code:codex,language:lang});
       }
     },[isClicked])

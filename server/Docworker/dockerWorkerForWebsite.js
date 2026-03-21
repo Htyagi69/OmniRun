@@ -30,9 +30,11 @@ dockerArgs.push(runtime.image, runtime.shell);
     cwd:process.env.HOME,
     env:process.env
 })
+console.log("port",port);
 
 ptyContainer.process.onData((data)=>{
     // process.stdout.write(data);
+    console.log("data in terminal",data)
     ws.emit('terminal-output',data)
 })
 }

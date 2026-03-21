@@ -24,14 +24,16 @@ export const Syncing=(ws,ptyContainer,userFolder,codeFolder)=>{
         }
 
         writeFilesInLocal(userFolder,files);
-        console.log(`Project synced for ${ws.id}`);
+        // console.log(`Project synced for ${ws.id}`);
+        console.log(`Project=> ${language}-${ptyContainer}-${codeFolder}- ${ws.id}`);
         
         startDockerForWebsite(language,ptyContainer,codeFolder,ws);
         //For instant boot up we preinstalled npm i in docker
         let runtime=LanguageRuntimes[language];
         setTimeout(() => {
-    // ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
-    ptyContainer.process.write(`${runtime.Compilecmd}`);
+            // ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
+            ptyContainer.process.write(`${runtime.Compilecmd}`);
+            console.log(`compile command ${runtime.Compilecmd}`);
     
     }, 1000);
 

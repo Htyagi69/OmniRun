@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import CodeEditor from './CodeEditor'
 import './App.css'
 import TerminalBox from './terminal'
@@ -7,13 +7,20 @@ import { LanguageBox } from './components/Language'
 function CodeAny({socket}){
   const [lang,setLang]=useState('cpp');
   const [isClicked,setIsClicked]=useState(false);
-  socket.on('message',data=>{
-    setMessages((prev)=>[...prev,data])
-    console.log("mess:",messages);
-    // socket.emit('message',messages)
-  })
+  useEffect(()=>{
+    if(!socket)  return;
+    socket.on('message',data=>{
+      setMessages((prev)=>[...prev,data])
+      console.log("mess:",messages);
+      // socket.emit('message',messages)
+    })
+  },[socket])
+
+  if (!socket) 
+    return <div className="bg-black text-white h-screen flex items-center justify-center">Connecting to Backend...</div>;
+  
   return (
-    <div className=' bg-green-400' >
+    <div className=' bg-black' >
     {/* <h1 className='text-green-600 text-4xl font-extrabold'>OmniVerse</h1> */}
     <div className='flex justify-between'>
     <LanguageBox socket={socket} setLang={setLang}/>

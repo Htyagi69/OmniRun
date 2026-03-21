@@ -4,6 +4,7 @@ import './App.css'
 import TerminalBox from './terminal'
 import { LanguageBox } from './components/Language'
 import Files from './Files'
+import { toast } from 'sonner'
 
 function Website({socket}){
   const [lang,setLang]=useState('javascript');
@@ -11,13 +12,16 @@ function Website({socket}){
   const [isClicked,setIsClicked]=useState(false);
   const [loadSite,setLoadSite]=useState(false);
 
+if (!socket) return <div className="bg-black text-white h-screen flex items-center justify-center">Connecting to Backend...</div>;
+
   return (
-    <div className=' bg-green-400' >
+    <div className=' bg-black' >
     {/* <h1 className='text-green-600 text-4xl font-extrabold'>OmniVerse</h1> */}
     <div className='flex justify-between'>
     {/* <LanguageBox socket={socket} setLang={setLang}/> */}
     <button onClick={()=>{
       setIsClicked(true)
+      toast.success("Code is Compiling ...")
     }} 
       className={`flex w-full cursor-pointer hover:bg-gray-600 m-2 bg-blue-400  p-2 font-bold justify-center rounded-sm mr-2 ${isClicked ? 'bg-white text-black':' bg-blue-400 text-white'}`}
       >
