@@ -1,36 +1,70 @@
 import { useState, useEffect } from "react";
-import { createClient } from "@supabase/supabase-js";
-import { LoginForm } from "@/components/login-form";
+import { SignupForm } from "@/components/Signup";
 import { toast } from "sonner";
-import { io } from "socket.io-client";
+import { LoginForm } from "@/components/login-form";
 
-const supabase=createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY
-)
-
-const Authclient=({setCheckPoint,socket,setSocket})=>{
+const Authclient=({supabase,createSocketConnection})=>{
+    const [name,setName]=useState('')
     const [email,setEmail]=useState('')
     const [password,setPassword]=useState('')
-    //  const session=null;
-    // useEffect(() => {
-    //     if (!session) return; // Wait until we have a user
+    const [login,setLogin]=useState(true);
 
-    //     // Initialize socket with the Supabase JWT
-    //     const newSocket = io("http://localhost:3000", {
-    //         auth: {
-    //             token: session.access_token // Pass the JWT here
-    //         }
-    //     });
+const handleSocialAuth=async()=>{
+    const { data, error } = await supabase.auth.signInWithOAuth({
+  provider:'google',
+  options: {
+    redirectTo: `http://localhost:5173`,
+  },
+})
+       if (error) {
+        console.error("SUPABASE ERROR:", error.message); // THIS WILL TELL US THE REASON
+        toast.error(error.message);
+    } else  if(data) {
+        console.log("SUCCESS DATA:", data);
+    } 
+}
 
-    //     setSocket(newSocket);
-    //        setTimeout(()=>{
-    //         setCheckPoint(true)
-    //     },1000)
-    //     return () => newSocket.close();
-    // }, [session]); // Re-run when session changes
-
-    const handleLogin=async(e)=>{
+   const handleloginWithPassword=async(e)=>{
+             e.preventDefault();
+             const {data,error}=await supabase.auth.signInWithPassword({
+                 email:email,
+                password:password,
+                options: {
+                shouldCreateUser: false,
+               emailRedirectTo: 'http://localhost:5173',
+             },
+            })
+               if (error) {
+        console.error("SUPABASE ERROR:", error.message); // THIS WILL TELL US THE REASON
+        toast.error(error.message);
+    } else  if(data) {
+        console.log("SUCCESS DATA:", data);
+        toast.success("Login Successfully");
+    }}
+    const handleLoginWithMagicLink=async()=>{
+      const {data,error}= await supabase.auth.signInWithOtp({
+    email:email,
+    password:password,
+    options: {
+      // set this to false if you do not want the user to be automatically signed up
+      shouldCreateUser: true,
+      emailRedirectTo: 'http://localhost:5173',
+    },
+  })
+    if (error) {
+        console.error("SUPABASE ERROR:", error.message); // THIS WILL TELL US THE REASON
+        toast.error(error.message);
+    } else  if(data) {
+        console.log("SUCCESS DATA:", data);
+    }
+  }
+    // const handleLogin=(e)=>{
+    //     e.preventDefault();
+    //     // console.log("event",e)
+    // // console.log("data",data)
+    //  createSocketConnection(data);
+    // }
+    const handleSignupWithPassword=async(e)=>{
         e.preventDefault();
         console.log("event",e)
         const {data,error}=await supabase.auth.signUp({
@@ -45,28 +79,30 @@ const Authclient=({setCheckPoint,socket,setSocket})=>{
         toast.error(error.message);
     } else  if(data) {
         console.log("SUCCESS DATA:", data);
-        // If session is still null here, the "Force Login" trick from my last message is next.
     }
-    console.log("data",data)
-    if(data?.session){
-        const newSocket=io('http://localhost:8080',{
-            auth:{
-                token:data.session.access_token,
-            }
-        })
-      newSocket.on('connect',()=>{
-          console.log("Connection established",newSocket.id)
-          setCheckPoint(true)
-      })
-       setSocket(newSocket)
+    // console.log("data",data)
+    createSocketConnection(data);
     }
-    }
+
     return(
         <div className="w-full h-screen bg-gray-400 ">
             <div className=" flex flex-col ml-56 mr-34">
-            <h1 className="text-5xl fon font-serif mb-23">Signup Page</h1>
-            <LoginForm setEmail={setEmail} email={email}           
-            setPassword={setPassword} handleLogin={handleLogin}/>
+                {login ? (
+                    <>
+                    <h1 className="text-5xl fon font-serif mb-23">Login Page</h1>
+                    <LoginForm setEmail={setEmail} email={email}           
+                    setPassword={setPassword} handleloginWithPassword={handleloginWithPassword} 
+                    handleLoginWithMagicLink={handleLoginWithMagicLink} setLogin={setLogin}
+                    handleSocialAuth={handleSocialAuth} />
+                    </>     
+                ):( 
+                    <>
+                    <h1 className="text-5xl fon font-serif mb-4">Signup Page</h1>
+                    <SignupForm name={name} setName={setName} setEmail={setEmail} email={email}           
+                    setPassword={setPassword} handleSignupWithPassword={handleSignupWithPassword}
+                     setLogin={setLogin} handleSocialAuth={handleSocialAuth}/>
+                    </>
+                )}
             </div>
         </div>
     )

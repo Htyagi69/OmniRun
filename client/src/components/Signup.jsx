@@ -15,14 +15,15 @@ import {
 } from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 
-export function LoginForm({
+export function SignupForm({
   className,
   loading,
+  name,
+  setName,
   email,
   setEmail,
   setPassword,
-  handleloginWithPassword,
-  handleLoginWithMagicLink,
+  handleSignupWithPassword,
   setLogin,
   handleSocialAuth,
   ...props
@@ -31,8 +32,14 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card >
         <CardContent>
-          <form onSubmit={handleloginWithPassword}>
+          <form onSubmit={handleSignupWithPassword}>
             <FieldGroup>
+              <Field>
+                <FieldLabel htmlFor="name">Username</FieldLabel>
+                <Input id="name" type="text" placeholder="Jhon" value={name}
+                    required={true}
+                    onChange={(e) => setName(e.target.value)}  />
+              </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email or username</FieldLabel>
                 <Input id="email" type="email" placeholder="m@example.com" value={email}
@@ -56,21 +63,21 @@ export function LoginForm({
               </Field>
               <Field>
                 <Button type="submit" disabled={loading}>
-                  {loading ? <span>Loading</span> : <span>Login</span>}
-                </Button>
-              <p>or</p>
-                <Button variant="outline" type="button" onClick={handleLoginWithMagicLink}>
-                  Login with MagicLink
+                  {loading ? <span>Loading</span> : <span>Signup</span>}
                 </Button>
               <p>or</p>
                 <Button variant="outline" type="button" onClick={handleSocialAuth}>
-                  Login with Google
+                  Register with Google
+                </Button>
+              <p>or</p>
+                <Button variant="outline" type="button">
+                  Register with GitHub
                 </Button>
                 <FieldDescription className="text-center">
-                  Don&apos;t have an account? <a  className='cursor-pointer' onClick={(e)=>{
+                   have an account? <a  className='cursor-pointer' onClick={(e)=>{
                   e.preventDefault()
-                  setLogin(false)
-                }}>Sign up</a>
+                  setLogin(true)
+                }}>Login</a>
                 </FieldDescription>
               </Field>
             </FieldGroup>

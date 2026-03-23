@@ -50,7 +50,9 @@ function TerminalBox({socket,setIsClicked,setPreview}) {
         <div className='flex flex-col'>
             <div className='bg-blue-500 flex justify-between p-1 rounded-sm'>
                 <div className='border-2 p-1 font-bold text-white bg-black rounded-sm'>output</div>
-                <button className='border-2 p-1 font-bold text-white bg-black rounded-sm pl-2 pr-2 hover:cursor-pointer hover:bg-white hover:text-black'>clear</button>
+                <button 
+                className='border-2 p-1 font-bold text-white bg-black rounded-sm pl-2 pr-2 hover:cursor-pointer hover:bg-white hover:text-black'
+                onClick={()=>socket.emit('terminal-input','clear \n')}>clear</button>
             </div>
         <div className='w-123 h-135' ref={terminalRef} style={{textAlign:'left'}}>
         </div>

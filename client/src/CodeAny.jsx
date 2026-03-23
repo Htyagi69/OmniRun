@@ -3,6 +3,7 @@ import CodeEditor from './CodeEditor'
 import './App.css'
 import TerminalBox from './terminal'
 import { LanguageBox } from './components/Language'
+import { toast } from 'sonner'
 
 function CodeAny({socket}){
   const [lang,setLang]=useState('cpp');
@@ -24,7 +25,12 @@ function CodeAny({socket}){
     {/* <h1 className='text-green-600 text-4xl font-extrabold'>OmniVerse</h1> */}
     <div className='flex justify-between'>
     <LanguageBox socket={socket} setLang={setLang}/>
-    <button onClick={()=>setIsClicked(true)} className={`flex w-34 bg-blue-400 cursor-pointer hover:bg-gray-500 p-2 font-bold justify-center rounded-sm mr-2 ${isClicked ? 'bg-white text-black':' bg-blue-400 text-white'}`}>Run code</button>
+    <button onClick={()=>{
+      setIsClicked(true)
+      toast.success("Compiling ...")
+    }
+    } 
+      className={`flex w-34 bg-blue-400 cursor-pointer hover:bg-gray-500 p-2 font-bold justify-center rounded-sm mr-2 ${isClicked ? 'bg-white text-black':' bg-blue-400 text-white'}`}>Run code</button>
     </div>
     <div className='flex'>
      <CodeEditor socket={socket} isClicked={isClicked} lang={lang}/>

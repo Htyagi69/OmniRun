@@ -37,7 +37,6 @@ if (!socket) return <div className="bg-black text-white h-screen flex items-cent
     </div>
     <div className='w-full bg-black border-2 '>
       {loadSite?(<iframe src="http://localhost:5174" width="1250px" height="620px"></iframe>):(<div className='bg-black text-white font-bold'>Starting server... Please wait</div>)}
-      {/* <iframe src="https://code-editor-blwn.vercel.app/" width="1250px"></iframe> */}
     </div>
     </div>
   );

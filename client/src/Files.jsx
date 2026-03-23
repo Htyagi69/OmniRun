@@ -1,6 +1,6 @@
 import { useEffect, useState,useRef } from 'react';
 import { Tree } from 'react-arborist';
-
+import { FileTypeImage } from './constants';
 // Helper to handle nested updates (Recursive)
 const updateTreename=(tree,id,newname)=>{
   return (
@@ -425,12 +425,18 @@ function Node({ node, style, dragHandle,setCode,deleteNode,setActivefileId,setAc
         }   
         return pathparts.join('/');
     }
+    const checkFileType=(name)=>{
+      const part=name.split('.')
+      // console.log("part",part)
+      if(part.length==3) return part[2];
+      else return part[1];
+    }
   return (
     <div
       style={style}
       ref={dragHandle}
       className={`flex items-center px-2 cursor-pointer hover:bg-gray-700 text-white
-        ${node.isSelected ?'bg-blue-300':'hover:bg-gray-300'}`}
+        ${node.isSelected ?'bg-gray-500':'hover:bg-gray-300'}`}
       onClick={() => {
         if(node.isLeaf){
           const fullPath=getFullPath(node);
@@ -449,10 +455,10 @@ function Node({ node, style, dragHandle,setCode,deleteNode,setActivefileId,setAc
       }}
 
     >
-      <span className="mr-2">
-        {node.isLeaf ? "📄" : node.isOpen ? "📂" : "📁"}
+     
+       {/* Rename */} <span className="mr-2">
+        {node.isLeaf ? <img src={FileTypeImage[checkFileType(node.data.name)]} className='w-5 h-7 '/> : node.isOpen ? "📂" : "📁"}
       </span>
-       {/* Rename */}
       {node.isEditing?(
          <input autoFocus defaultValue={node.data.name} 
          onBlur={(e)=>node.submit(e.target.value)}
@@ -502,4 +508,3 @@ function Node({ node, style, dragHandle,setCode,deleteNode,setActivefileId,setAc
     </div>
   );
 }
-

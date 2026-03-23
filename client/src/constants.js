@@ -39,3 +39,11 @@ if __name__ == "__main__":
     }
 }`
 }
+
+export const FileTypeImage={
+  jsx:`react.svg`,
+  css:`css.svg`,
+  json:`json.svg`,
+  html:`html.svg`,
+  js:`js.svg`
+}
