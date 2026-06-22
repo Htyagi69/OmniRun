@@ -97,14 +97,17 @@ function readFiles(db){
     if(request.result){
     setData(request.result.tree);
     }else{
-       const initialData = [
+       const initialReactData = [{
+         id: "r1",
+         name: "client",
+         hierarcy:1,
+         children: [
   {
-    id: "1",
+    id: "r12",
     name: "src",
-    hierarcy:1,
     children: [
       {
-        id: "d1",
+        id: "r121",
         name: "main.jsx",
         value: `import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -118,7 +121,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
 )`
       },
       {
-        id: "d2",
+        id: "r122",
         name: "App.jsx",
         value: `import React from 'react'
 import './App.css'
@@ -135,19 +138,19 @@ function App() {
 export default App`
       },
       {
-        id: "d3",
+        id: "r123",
         name: "App.css",
         value: `.App { text-align: center; background-color: #282c34; min-height: 100vh; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }`
       },
       {
-        id: "d4",
+        id: "r124",
         name: "index.css",
         value: `body { margin: 0; font-family: sans-serif; }`
       }
     ]
   },
   {
-    id: "2",
+    id: "r21",
     name: "index.html",
     value: `<!doctype html>
 <html lang="en">
@@ -163,7 +166,7 @@ export default App`
 </html>`
   },
   {
-    id: "3",
+    id: "r31",
     name: "vite.config.js",
     value: `import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
@@ -187,12 +190,12 @@ export default defineConfig({
 })`
   },
   {
-    id: "4",
+    id: "r41",
     name: "package-lock.json",
     value: `{ "name": "vite-react-app", "lockfileVersion": 3 }`
   },
   {
-    id: "5",
+    id: "r51",
     name: "package.json",
     value: JSON.stringify({
       name: "vite-react-app",
@@ -212,12 +215,17 @@ export default defineConfig({
         "vite": "^5.0.0"
       }
     }, null, 2)
-  }
-];
+  },
+ ]
+  }];
 
-const nodeInitialData = [
+const nodeInitialData = [{
+       id: "b1",
+         name: "server",
+         hierarcy:1,
+         children: [
   {
-    id: "1",
+    id: "b12",
     name: "index.js",
     value: `const http = require('http');
 const server = http.createServer((req, res) => {
@@ -226,7 +234,7 @@ const server = http.createServer((req, res) => {
 server.listen(8081, () => console.log('Server running on port 8081'));`
   },
   {
-    id: "2",
+    id: "b21",
     name: "package.json",
     value: JSON.stringify({
       name: "node-app",
@@ -234,10 +242,11 @@ server.listen(8081, () => console.log('Server running on port 8081'));`
       dependencies: {}
     }, null, 2)
   }
-];
+]
+ }];
 
-        setData(initialData);
-        saveToDB(db,initialData);
+        setData([...initialReactData,...nodeInitialData]);
+        saveToDB(db,[...initialReactData,...nodeInitialData]);
     }
   }
 }
@@ -256,7 +265,7 @@ useEffect(()=>{
     if(socket){
         socket.emit("sync-full-project",{
       files:data,
-      language:"react"
+      language:"concurrent"
     })
   }
   }
@@ -392,7 +401,7 @@ const deleteNode = (idToDelete) => {
         </div>
       </div>
     <Tree
-      // initialData={data}
+      // initialReactData={data}
       data={data} 
       openByDefault={false}
       width={200}

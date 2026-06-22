@@ -34,9 +34,17 @@ export const LanguageRuntimes={
 //     shell: 'bash',
 //     isProject: true, // This tells your backend: "Wait, this needs more than one file!"
 //     port: 5174,      // The port Vite uses
-//     compileCmd: 'npm install && npm run dev -- --host\r',
+//     CompileCmd: 'npm install && npm run dev -- --host\r',
 //     fileName: 'src/App.jsx'
-// }
+// },
+// node: {
+//     image: 'node:20-alpine', // Light-weight Node image
+//     shell: 'sh',
+//     port: 8081, // Use a different port than your main server
+//     // Command to link modules and start with watch mode
+//     CompileCmd: 'node --watch index.js\r',
+//     fileName: 'server/index.js'
+// },
 
        react:{
         image:'react-base-image',//new custom image
@@ -45,15 +53,22 @@ export const LanguageRuntimes={
         // 1. Create a link from the base modules to the current folder
         // 2. Start Vite immediately (NO npm install needed!)
         Compilecmd:'ln -s /base/node_modules /app/node_modules && npm run dev -- --host --port 5174\r',
-        fileName:'src/App.jsx'
-       },
-       node: {
+    fileName:'client/src/App.jsx'
+},
+node: {
     image: 'node:20-alpine', // Light-weight Node image
     shell: 'sh',
     port: 8081, // Use a different port than your main server
     // Command to link modules and start with watch mode
-    Compilecmd: 'ln -s /base/node_modules /app/node_modules && node --watch index.js\r',
-    fileName: 'index.js'
-    }
+    Compilecmd: 'ln -s /base/node_modules /app/node_modules && node --watch server/index.js\r',
+    fileName: 'server/index.js'
+},
+concurrent:{
+    image: 'react-base-image', // ✅ use your working image
+    shell: 'bash',
+    port: 5174,
+    Compilecmd: `ln -s /base/node_modules /app/node_modules && node server/index.js & cd client && npm run dev -- --host --port 5174 \r`,
+    fileName: 'server/index.js'
+}
 }
    

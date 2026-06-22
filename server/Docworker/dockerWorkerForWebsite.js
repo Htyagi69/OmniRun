@@ -8,6 +8,7 @@ export const startDockerForWebsite=(language,ptyContainer,codeFolder,ws)=>{
         ptyContainer.process=null;
     }
      const userFolder=path.join(codeFolder,ws.id)
+     console.log("folders",userFolder)
         //PTY process
    const runtime = LanguageRuntimes[language.toLowerCase()];
     const dockerArgs = [
@@ -21,6 +22,7 @@ export const startDockerForWebsite=(language,ptyContainer,codeFolder,ws)=>{
 // Add this so the iframe can actually see the website!
 const port = runtime.port || 5174;
     dockerArgs.push('-p', `${port}:${port}`);
+    dockerArgs.push('-p', '8081:8081'); // 🔥 ADD THIS
 
 dockerArgs.push(runtime.image, runtime.shell);
      ptyContainer.process=pty.spawn('docker',dockerArgs,{

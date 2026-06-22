@@ -37,7 +37,25 @@ if __name__ == "__main__":
     public static void main(String[] args) {
         System.out.println("Hello, World!");
     }
-}`
+}`,
+react:`import React from 'react'
+import './App.css'
+
+function App() {
+  return (
+    <div className="App">
+      <h1>Hello from CodeAny!</h1>
+      <p>Edit this file to see magic happen.</p>
+      <p>Edit this file to see magic happen.</p>
+      <p>Edit this file to see magic happen.</p>
+      <p>Edit this file to see magic happen.</p>
+      <p>Edit this file to see magic happen.</p>
+      <p>Edit this file to see magic happen.</p>
+    </div>
+  )
+}
+
+export default App`
 }
 
 export const FileTypeImage={

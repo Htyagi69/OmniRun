@@ -4,10 +4,10 @@ import fs from 'fs'
 import path from "node:path"
 
 export const runCode=(ws,ptyContainer,lang,userFolder,codeFolder)=>{
-ws.on('message',(data)=>{
-    console.log(`received`,data);
-    io.emit('message',data);
-})
+// ws.on('message',(data)=>{
+//     console.log(`received`,data);
+//     io.emit('message',data);
+// })
 ws.on('run-code',({code,language})=>{
     lang=language;
     let runtime=LanguageRuntimes[lang];
@@ -27,8 +27,8 @@ ws.on('run-code',({code,language})=>{
         },1000)
     })
 
-    ws.on('message',(data)=>{
-    console.log(`received`,data);
-    io.emit('message',data);
-})
+    // ws.on('message',(data)=>{
+    // console.log(`received`,data);
+    // io.emit('message',data);
+// })
 }

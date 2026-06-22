@@ -7,7 +7,7 @@ import Files from './Files'
 import { toast } from 'sonner'
 
 function Website({socket}){
-  const [lang,setLang]=useState('javascript');
+  const [lang,setLang]=useState('react');
   const [code,setCode]=useState();
   const [isClicked,setIsClicked]=useState(false);
   const [loadSite,setLoadSite]=useState(false);
