@@ -272,14 +272,18 @@ useEffect(()=>{
   setIsClicked(false);
 },[isClicked])
 
-   useEffect(()=>{
-   if (socket && typeof socket.emit === 'function') {
-  socket.emit('update-File',{
-    filePath:path,
-    content:code,
-  })
-}
-},[code,socket])
+ useEffect(() => {
+  if (!socket || !path || path === '/') return;
+  
+  const timer = setTimeout(() => {
+    socket.emit('update-File', {
+      filePath: path,
+      content: code,
+    });
+  }, 500); 
+
+  return () => clearTimeout(timer);
+}, [code, socket, path])
 
 const saveToDB = (database, treeData) => {
     if (!database) return;
