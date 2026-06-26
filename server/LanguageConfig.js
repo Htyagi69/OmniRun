@@ -67,7 +67,7 @@ concurrent:{
     image: 'react-base-image', // ✅ use your working image
     shell: 'bash',
     port: 5174,
-    Compilecmd: `ln -s /base/node_modules /app/node_modules && node server/index.js & cd client && npm run dev -- --host --port 5174 \r`,
+    Compilecmd: `ln -s /base/node_modules /app/node_modules && node server/index.js && cd client && npm run dev -- --host --port 5174 \r`,
     fileName: 'server/index.js'
 }
 }

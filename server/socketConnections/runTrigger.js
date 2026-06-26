@@ -10,8 +10,11 @@ export const runCode=(ws,ptyContainer,lang,userFolder,codeFolder)=>{
 // })
 ws.on('run-code',({code,language})=>{
     lang=language;
+    ptyContainer.language=language;
     let runtime=LanguageRuntimes[lang];
-    startDockerForCompiler(lang,ptyContainer,codeFolder,ws);
+    
+
+    startDockerForCompiler(lang,ptyContainer,userFolder,ws);
     // console.log("code=====>",code);
     console.log("language",language);
     

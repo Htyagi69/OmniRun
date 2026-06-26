@@ -27,7 +27,7 @@ export const Syncing=(ws,ptyContainer,userFolder,codeFolder)=>{
         // console.log(`Project synced for ${ws.id}`);
         console.log(`Project=> ${language}-${ptyContainer}-${codeFolder}- ${ws.id}`);
         
-        startDockerForWebsite(language,ptyContainer,codeFolder,ws);
+        startDockerForWebsite(language,ptyContainer,userFolder,ws);
         //For instant boot up we preinstalled npm i in docker
         let runtime=LanguageRuntimes[language];
         setTimeout(() => {

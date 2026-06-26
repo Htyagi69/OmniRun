@@ -3,7 +3,7 @@ import { Terminal } from '@xterm/xterm'
 import { FitAddon } from '@xterm/addon-fit';
 import "@xterm/xterm/css/xterm.css";
 
-function TerminalBox({socket,setIsClicked,setPreview,editorWidth}) {
+function TerminalBox({socket,setIsClicked,setPreview,terminalId,onClose,folder,isActive}) {
     const terminalRef=useRef(null);
     const xtermInstance=useRef(null);
     useEffect(()=>{
@@ -19,40 +19,42 @@ function TerminalBox({socket,setIsClicked,setPreview,editorWidth}) {
     });
         xtermInstance.current=term;
         term.onData((input)=>{
-              if (input === '\r' && socket) {
-                  socket.emit('terminal-input', '\r\n'); // Move to next line
-                      } 
-    // Detect Backspace
-             else if (input === '\x7f' && socket) {
-                   socket.emit('terminal-input', '\b \b'); // Move back, space (erase), move back
-               } 
-             else {
-                   if(socket)
-                    socket.emit('terminal-input', input);
-               }
+            if(!socket) return;
+           if (input === '\r') {
+        socket.emit('terminal-input', { terminalId, input: '\r\n' });
+    } else if (input === '\x7f') {
+        socket.emit('terminal-input', { terminalId, input: '\b \b' });
+    } else {
+        socket.emit('terminal-input', { terminalId, input });
+    }
         })
          const handleOutput=(serverData)=>{
             // console.log('state got it',serverData.includes('ready in'));
-            if(serverData.includes('ready in')){
-                setPreview(true);
+            if(serverData.terminalId==terminalId){
+
+                if(serverData.data.includes('ready in')){
+                    setPreview(true);
+                }
+                console.log(serverData.data);
+                term.write(serverData.data)
+                setIsClicked(false);
             }
-            console.log(serverData);
-            term.write(serverData)
-            setIsClicked(false);
         }
-         socket.on('terminal-output',handleOutput)
+            socket.on('terminal-output',handleOutput)
         return ()=>{
             socket.off('terminal-output',handleOutput)
              term.dispose();
         }
-    },[socket])
+    },[socket,terminalId])
     return (
-        <div className='flex flex-col ' style={{ width: '100%', height: '100%' }}>
+        <div className={`flex flex-col w-full h-full ${isActive ? 'border-2 border-green-500' : ''}`}>
             <div className='bg-blue-500 flex justify-between p-1 rounded-sm'>
-                <div className='border-2 p-1 font-bold text-white bg-black rounded-sm'>output</div>
+                <div className='border-2 px-2 font-bold text-white bg-black rounded-sm'>output</div>
+                <div className='text-white bg-black px-2'>Terminal {terminalId}</div>
+                <button onClick={onClose} className='bg-red-500 text-white px-2'>×</button>
                 <button 
                 className='border-2 p-1 font-bold text-white bg-black rounded-sm pl-2 pr-2 hover:cursor-pointer hover:bg-white hover:text-black'
-                onClick={()=>socket.emit('terminal-input','clear \n')}>clear</button>
+                onClick={()=>socket.emit('terminal-input',{terminalId,input:'clear \n'})}>clear</button>
             </div>
         <div style={{ flex: 1, minHeight: 0, width: '100%' ,textAlign:'left'}} ref={terminalRef}>
         </div>

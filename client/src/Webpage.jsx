@@ -5,12 +5,14 @@ import TerminalBox from './terminal'
 import { LanguageBox } from './components/Language'
 import Files from './Files'
 import { toast } from 'sonner'
+import TerminalContainer from './terminalContainer'
 
 function Website({socket}){
   const [lang,setLang]=useState('react');
   const [code,setCode]=useState();
   const [isClicked,setIsClicked]=useState(false);
   const [loadSite,setLoadSite]=useState(false);
+  const [activeTerminalId,setActiveTerminalId]=useState('0');
 
 if (!socket) return <div className="bg-black text-white h-screen flex items-center justify-center">Connecting to Backend...</div>;
 
@@ -29,10 +31,10 @@ if (!socket) return <div className="bg-black text-white h-screen flex items-cent
         </button>
     </div>
     <div className='flex'>
-         <Files socket={socket} setCode={setCode} code={code} isClicked={isClicked} setIsClicked={setIsClicked}/>
+     <Files socket={socket} setCode={setCode} code={code} isClicked={isClicked} setIsClicked={setIsClicked}/>
      <WebEditor socket={socket} isClicked={isClicked} lang={lang} setCode={setCode} code={code}/>
      <div className='flex flex-col border-2'>
-     <TerminalBox socket={socket} setIsClicked={setIsClicked}  setPreview={setLoadSite}/>
+     <TerminalContainer socket={socket} setIsClicked={setIsClicked}  setPreview={setLoadSite} activeTerminalId={activeTerminalId} setActiveTerminalId={setActiveTerminalId}/>
       </div>
     </div>
     <div className='w-full bg-black border-2 '>

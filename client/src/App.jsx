@@ -24,10 +24,16 @@ function App() {
 
       const createSocketConnection=(data)=>{
             if(data?.session){
+        const userId=data.session.user.id;
         const newSocket=io('http://localhost:8080',{
             auth:{
                 token:data.session.access_token,
-            }
+                userId:userId,
+            },
+            reconnection:true,
+            reconnectionDelay:1000,
+            reconnectionDelayMax:5000,
+            reconnectionAttempts:5
         })
       newSocket.on('connect',()=>{
           console.log("Connection established",newSocket.id)

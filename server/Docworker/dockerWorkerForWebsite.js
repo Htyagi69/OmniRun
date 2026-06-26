@@ -2,23 +2,32 @@ import { LanguageRuntimes } from "../LanguageConfig.js";
 import  * as pty from 'node-pty'
 import path from 'node:path'
 
-export const startDockerForWebsite=(language,ptyContainer,codeFolder,ws)=>{
-    if(ptyContainer.process){
-        ptyContainer.process.kill();
-        ptyContainer.process=null;
-    }
-     const userFolder=path.join(codeFolder,ws.id)
+export const startDockerForWebsite=(language,ptyContainer,userFolder,ws)=>{
+    // if(ptyContainer.process){
+    //     ptyContainer.process.kill();
+    //     ptyContainer.process=null;
+    // }
+
+    //  const userFolder=path.join(codeFolder,ws.id)
      console.log("folders",userFolder)
+     if(ptyContainer.containerName){
+          console.log("Container already running, reusing...");
+        return;
+     }
         //PTY process
    const runtime = LanguageRuntimes[language.toLowerCase()];
+   const containerName=`replit-${ws.handshake.auth.userId}-${Date.now()}`
     const dockerArgs = [
-    'run', '-it', '--rm',
+    'run', '-it', '--rm','--name',containerName,
     '--memory', '512m',
     '--cpus', '0.5',
     // THIS IS THE KEY PART:
     '-v', `${userFolder}:/app`,  // Map host userFolder to container /app
     '-w', '/app',                // Tell Docker to start inside /app
 ];
+
+ptyContainer.containerName=containerName;
+ptyContainer.terminals=new Map();
 // Add this so the iframe can actually see the website!
 const port = runtime.port || 5174;
     dockerArgs.push('-p', `${port}:${port}`);
@@ -37,6 +46,7 @@ console.log("port",port);
 ptyContainer.process.onData((data)=>{
     // process.stdout.write(data);
     console.log("data in terminal",data)
-    ws.emit('terminal-output',data)
+    ws.emit('terminal-output',{terminalId:'0',data});
 })
+console.log("Container started:", containerName);
 }

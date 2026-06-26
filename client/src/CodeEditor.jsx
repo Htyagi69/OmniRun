@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState, useCallback } from 'react'
 import Editor from '@monaco-editor/react';
 import { StarterCode } from './constants'
 
-function CodeEditor({ socket, isClicked, lang ,editorWidth,setEditorWidth}) {
+function CodeEditor({ socket, isClicked, lang ,editorWidth,setEditorWidth,activeTerminalId}) {
   const EditorRef = useRef(null);
   const [codex, setCodex] = useState();
   const isDragging = useRef(false);
@@ -14,7 +14,7 @@ function CodeEditor({ socket, isClicked, lang ,editorWidth,setEditorWidth}) {
 
   useEffect(() => {
     if (isClicked && socket) {
-      socket.emit('run-code', { code: codex, language: lang });
+      socket.emit('run-code', { code: codex, language: lang ,targetTerminalId:activeTerminalId});
     }
   }, [isClicked])
 

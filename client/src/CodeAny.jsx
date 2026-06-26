@@ -4,11 +4,13 @@ import './App.css'
 import TerminalBox from './terminal'
 import { LanguageBox } from './components/Language'
 import { toast } from 'sonner'
+import TerminalContainer from './terminalContainer'
 
 function CodeAny({socket}){
   const [lang,setLang]=useState('cpp');
     const [editorWidth, setEditorWidth] = useState(100);
   const [isClicked,setIsClicked]=useState(false);
+  const [activeTerminalId,setActiveTerminalId]=useState('0');
   // useEffect(()=>{
   //   if(!socket)  return;
   //   socket.on('message',data=>{
@@ -34,9 +36,9 @@ function CodeAny({socket}){
       className={`flex w-34 bg-blue-400 cursor-pointer hover:bg-gray-500 p-2 font-bold justify-center rounded-sm mr-2 ${isClicked ? 'bg-white text-black':' bg-blue-400 text-white'}`}>Run code</button>
     </div>
     <div className='flex'>
-     <CodeEditor socket={socket} isClicked={isClicked} lang={lang} editorWidth={editorWidth} setEditorWidth={setEditorWidth}/>
+     <CodeEditor socket={socket} isClicked={isClicked} lang={lang} editorWidth={editorWidth} setEditorWidth={setEditorWidth} activeTerminalId={activeTerminalId}/>
      <div className='flex-1' style={{ width: '532px'}}>
-     <TerminalBox socket={socket} setIsClicked={setIsClicked} editorWidth={editorWidth}/>
+     <TerminalContainer socket={socket} setIsClicked={setIsClicked} editorWidth={editorWidth} activeTerminalId={activeTerminalId} setActiveTerminalId={setActiveTerminalId}/>
       </div>
     </div>
     </div>
