@@ -2,7 +2,7 @@ import { LanguageRuntimes } from "../LanguageConfig.js";
 import path from 'node:path'
 import  * as pty from 'node-pty'
 
-export const startDockerForCompiler=(language,ptyContainer,userFolder,ws)=>{
+export const startDockerForCompiler=(language,ptyContainer,userFolder,ws,activeTerminal)=>{
     //     if(ptyContainer.process){
     //     ptyContainer.process.kill();
     //     ptyContainer.process=null;
@@ -34,11 +34,19 @@ export const startDockerForCompiler=(language,ptyContainer,userFolder,ws)=>{
 ptyContainer.containerName=containerName;
 ptyContainer.terminals=new Map();
 
+ws.on('select-terminal',({terminalId})=>{
+      ptyContainer.activeTerminalId = terminalId;
+    console.log('Terminal selected:', terminalId);
+})
+
 ptyContainer.process.onData((data)=>{
+
+        console.log("active",activeTerminal)
         console.log("data in terminal",data)
     // process.stdout.write(data);
     ws.emit('terminal-output',data);
-    ws.emit('terminal-output',{terminalId:'0',data});
+    const terminalId = ptyContainer.activeTerminalId || '0';
+    ws.emit('terminal-output',{terminalId,data});
 })
 console.log("Container started:", containerName);
 

@@ -24,6 +24,13 @@ app.get('/',(req,res)=>{
     res.json({message:'thanks for server'})
 })
 
+process.on('SIGINT',()=>{
+    console.log("Server is going to shutdown...");
+    server.close(()=>{
+        console.log("!!Sever closed");
+        process.exit(0);
+    })
+})
 server.listen(PORT,()=>{
     console.log(`Server is running at http://localhost:${PORT}`);
     

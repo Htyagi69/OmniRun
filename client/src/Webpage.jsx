@@ -31,7 +31,7 @@ if (!socket) return <div className="bg-black text-white h-screen flex items-cent
         </button>
     </div>
     <div className='flex'>
-     <Files socket={socket} setCode={setCode} code={code} isClicked={isClicked} setIsClicked={setIsClicked}/>
+     <Files socket={socket} setCode={setCode} code={code} isClicked={isClicked} setIsClicked={setIsClicked} activeTerminalId={activeTerminalId}/>
      <WebEditor socket={socket} isClicked={isClicked} lang={lang} setCode={setCode} code={code}/>
      <div className='flex flex-col border-2'>
      <TerminalContainer socket={socket} setIsClicked={setIsClicked}  setPreview={setLoadSite} activeTerminalId={activeTerminalId} setActiveTerminalId={setActiveTerminalId}/>

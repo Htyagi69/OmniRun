@@ -14,7 +14,7 @@ function CodeEditor({ socket, isClicked, lang ,editorWidth,setEditorWidth,active
 
   useEffect(() => {
     if (isClicked && socket) {
-      socket.emit('run-code', { code: codex, language: lang ,targetTerminalId:activeTerminalId});
+      socket.emit('run-code', { code: codex, language: lang ,activeTerminal:activeTerminalId});
     }
   }, [isClicked])
 

@@ -9,8 +9,8 @@ export const createTerminal=(ws,ptyContainer)=>{
             return;
         }
 
+        if(!ptyContainer) return;
         setTimeout(()=>{
-
             const runtime=LanguageRuntimes[ptyContainer.language.toLowerCase()];
             const terminalPty = pty.spawn('docker', [
             'exec', '-it',

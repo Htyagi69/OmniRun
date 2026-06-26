@@ -63,5 +63,6 @@ export const FileTypeImage={
   css:`css.svg`,
   json:`json.svg`,
   html:`html.svg`,
-  js:`js.svg`
+  js:`js.svg`,
+  env:`env.svg`,
 }

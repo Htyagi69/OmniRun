@@ -51,7 +51,7 @@ const addNodeToTree = (tree, parentId, newNode) => {
   });
 };
 
-function Files({socket,setCode,code,isClicked,setIsClicked}) {
+function Files({socket,setCode,code,isClicked,setIsClicked,activeTerminalId}) {
   const [db,setDB]=useState(null);
   const [data,setData] =useState([])
   const [activeFileId,setActivefileId]=useState();
@@ -265,7 +265,8 @@ useEffect(()=>{
     if(socket){
         socket.emit("sync-full-project",{
       files:data,
-      language:"concurrent"
+      language:"concurrent",
+      activeTerminal:activeTerminalId,
     })
   }
   }

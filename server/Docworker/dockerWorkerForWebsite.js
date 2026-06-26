@@ -2,7 +2,7 @@ import { LanguageRuntimes } from "../LanguageConfig.js";
 import  * as pty from 'node-pty'
 import path from 'node:path'
 
-export const startDockerForWebsite=(language,ptyContainer,userFolder,ws)=>{
+export const startDockerForWebsite=(language,ptyContainer,userFolder,ws,activeTerminal)=>{
     // if(ptyContainer.process){
     //     ptyContainer.process.kill();
     //     ptyContainer.process=null;
@@ -28,6 +28,11 @@ export const startDockerForWebsite=(language,ptyContainer,userFolder,ws)=>{
 
 ptyContainer.containerName=containerName;
 ptyContainer.terminals=new Map();
+
+ws.on('select-terminal',({terminalId})=>{
+      ptyContainer.activeTerminalId = terminalId;
+    console.log('Terminal selected:', terminalId);
+})
 // Add this so the iframe can actually see the website!
 const port = runtime.port || 5174;
     dockerArgs.push('-p', `${port}:${port}`);
@@ -46,7 +51,8 @@ console.log("port",port);
 ptyContainer.process.onData((data)=>{
     // process.stdout.write(data);
     console.log("data in terminal",data)
-    ws.emit('terminal-output',{terminalId:'0',data});
+    const terminalId=ptyContainer.activeTerminalId || '0';
+    ws.emit('terminal-output',{terminalId,data});
 })
 console.log("Container started:", containerName);
 }

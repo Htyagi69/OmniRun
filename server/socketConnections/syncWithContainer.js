@@ -4,7 +4,7 @@ import { startDockerForWebsite } from '../Docworker/dockerWorkerForWebsite.js'
 import { LanguageRuntimes } from '../LanguageConfig.js'
 
 export const Syncing=(ws,ptyContainer,userFolder,codeFolder)=>{
-    ws.on("sync-full-project",({files,language})=>{
+    ws.on("sync-full-project",({files,language,activeTerminal})=>{
         
      const writeFilesInLocal=(basePath,items)=>{
          items.forEach(item => {
@@ -27,9 +27,10 @@ export const Syncing=(ws,ptyContainer,userFolder,codeFolder)=>{
         // console.log(`Project synced for ${ws.id}`);
         console.log(`Project=> ${language}-${ptyContainer}-${codeFolder}- ${ws.id}`);
         
-        startDockerForWebsite(language,ptyContainer,userFolder,ws);
+        startDockerForWebsite(language,ptyContainer,userFolder,ws,activeTerminal);
         //For instant boot up we preinstalled npm i in docker
         let runtime=LanguageRuntimes[language];
+
         setTimeout(() => {
             // ptyProcess.write(`${installCmd}npm run dev -- --host\r`);
             ptyContainer.process.write(`${runtime.Compilecmd}`);

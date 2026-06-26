@@ -32,7 +32,11 @@ const removeTerminal=(id)=>{
             <div className='flex-1 flex gap-2 overflow-auto'>
                 {terminals.map(term => (
                     <div key={term.id} className='flex-1 min-w-0'
-                    onClick={()=>setActiveTerminalId(term.id)}>
+                    onClick={()=>
+                    {
+                        setActiveTerminalId(term.id);
+                        socket.emit('select-terminal',{terminalId:term.id})
+                    }}>
                         <TerminalBox
                             key={term.id} 
                             socket={socket}

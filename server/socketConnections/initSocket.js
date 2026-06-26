@@ -36,10 +36,11 @@ let lang=null;
 //Jab hum Object bhejte hain (ptyContainer), toh function us object ke Reference (address) ko pakad leta hai. Jab aap main file mein ptyContainer.process ko change karte ho, toh function ko wahi updated value milti hai.
 if(!userContainers.has(userId)) { 
    userContainers.set(userId,
-   {  process: null,
+   { process: null,
     containerName:null,
     terminals:new Map(),
-    language:null
+    language:null,
+    activeTerminalId:null
 })
 };
 
